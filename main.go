@@ -84,8 +84,9 @@ func SetupRouter() (*gin.Engine, error) {
 
 	// Create a log file with start time
 	dt := time.Now()
-	t := dt.Format(time.RFC3339)
-	file, err := os.Create("./logs/start:" + t + ".log")
+	t := dt.Format(time.RFC822)
+
+	file, err := os.Create("./logs/start-" + t + ".log")
 	if err != nil {
 		return nil, err
 	}
@@ -125,13 +126,13 @@ func SetupRouter() (*gin.Engine, error) {
 
 	router.Use(middleware.CORS())
 	router.Use(middleware.SentryCapture(configure.Logger.SentryDsn))
-	router.Use(middleware.Firewall(
+	/*router.Use(middleware.Firewall(
 		configure.Security.Firewall.ListType,
 		configure.Security.Firewall.IP,
-	))
+	))*/
 
 	// Render HTML
-	router.Use(middleware.Pongo2())
+	//router.Use(middleware.Pongo2())
 
 	// API:v1.0
 	v1 := router.Group("/api/v1/")
@@ -173,7 +174,7 @@ func SetupRouter() (*gin.Engine, error) {
 		}
 
 		// REDIS Playground
-		if configure.Database.REDIS.Activate == "yes" {
+		/*if configure.Database.REDIS.Activate == "yes" {
 			rPlayground := v1.Group("playground")
 			rPlayground.GET("/redis_read", controller.RedisRead)        // Non-protected
 			rPlayground.POST("/redis_create", controller.RedisCreate)   // Non-protected
@@ -194,7 +195,7 @@ func SetupRouter() (*gin.Engine, error) {
 			rPlaygroundMongo.PUT("/mongo_update_by_id", controller.MongoUpdateByID)               // Non-protected
 			rPlaygroundMongo.DELETE("/mongo_delete_field_by_id", controller.MongoDeleteFieldByID) // Non-protected
 			rPlaygroundMongo.DELETE("/mongo_delete_doc_by_id/:id", controller.MongoDeleteByID)    // Non-protected
-		}
+		}*/
 
 		// Basic Auth demo
 		user := configure.Security.BasicAuth.Username

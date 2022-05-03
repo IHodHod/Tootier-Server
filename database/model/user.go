@@ -1,20 +1,27 @@
 package model
 
-import (
-	"time"
-
-	"gorm.io/gorm"
-)
+import "time"
 
 // User model - `users` table
 type User struct {
-	UserID    uint64 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	FirstName string         `json:"FirstName,omitempty"`
-	LastName  string         `json:"LastName,omitempty"`
-	IDAuth    uint64         `json:"-"`
-	Posts     []Post         `gorm:"foreignkey:IDUser;references:UserID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:",omitempty"`
-	Hobbies   []Hobby        `gorm:"many2many:user_hobbies" json:",omitempty"`
+	UserID    uint64 `json:"user_id" gorm:"primaryKey"`
+	UserName  *string `json:"user_name"`
+	Password string `json:"password"`
+	Name string         `json:"name"`
+	PhoneNumber *string `json:"phone_number"`
+	RegisterTime time.Time `json:"register_time"`
+	UserGeo `gorm:"embedded"`
+	RoleID uint64 `json:"role_id"` // TODO Relation
+	ProfileID uint64 `json:"profile_id"` // TODO Relation
+	//IDAuth    uint64         `json:"-"`
+}
+
+type Role struct {
+	RoleID uint64 `json:"role_id" gorm:"primaryKey"`
+	RoleName string `json:"role_name"`
+}
+
+type UserGeo struct {
+	LatitudeX string `json:"latitude_x"`
+	LongitudeY string `json:"longitude_y"`
 }

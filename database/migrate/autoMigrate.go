@@ -17,6 +17,25 @@ type auth model.Auth
 type user model.User
 type post model.Post
 type hobby model.Hobby
+type bookmark model.Bookmark
+type comment model.Comment
+type commentLike model.CommentLike
+type commentDisLike model.CommentDisLike
+type device model.Device
+type follower model.Follower
+type following model.Following
+type hashtag model.Hashtag
+type hashMain model.HashMain
+type like model.Like
+type disLike model.DisLike
+type notify model.Notify
+type media model.Media
+type mention model.Mention
+type profile model.Profile
+type tooti model.Tooti
+type view model.View
+type role model.Role
+
 type userHobby model.UserHobby
 
 var db *gorm.DB
@@ -61,7 +80,9 @@ func main() {
 
 func dropAllTables() {
 	// Careful! It will drop all the tables!
-	if err := db.Migrator().DropTable(&userHobby{}, &hobby{}, &post{}, &user{}, &auth{}); err != nil {
+	if err := db.Migrator().DropTable(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
+	&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
+	&commentLike{} , &commentDisLike{} , &device{}); err != nil {
 		errorState = 1
 		fmt.Println(err)
 	} else {
@@ -75,16 +96,18 @@ func migrateTables() {
 
 	if driver == "mysql" {
 		// db.Set() --> add table suffix during auto migration
-		if err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&auth{},
-			&user{}, &post{}, &hobby{}); err != nil {
+		if err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
+			&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
+			&commentLike{} , &commentDisLike{} , &device{}); err != nil {
 			errorState = 1
 			fmt.Println(err)
 		} else {
 			fmt.Println("New tables are  migrated successfully!")
 		}
 	} else {
-		if err := db.AutoMigrate(&auth{},
-			&user{}, &post{}, &hobby{}); err != nil {
+		if err := db.AutoMigrate(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
+			&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
+			&commentLike{} , &commentDisLike{} , &device{}); err != nil {
 			errorState = 1
 			fmt.Println(err)
 		} else {
@@ -95,7 +118,7 @@ func migrateTables() {
 
 func setPkFk() {
 	// Manually set foreign key for MySQL and PostgreSQL
-	if err := db.Migrator().CreateConstraint(&auth{}, "User"); err != nil {
+	/*if err := db.Migrator().CreateConstraint(&auth{}, "User"); err != nil {
 		errorState = 1
 		fmt.Println(err)
 	}
@@ -103,5 +126,5 @@ func setPkFk() {
 	if err := db.Migrator().CreateConstraint(&user{}, "Posts"); err != nil {
 		errorState = 1
 		fmt.Println(err)
-	}
+	}*/
 }
