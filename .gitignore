@@ -1,5 +1,7 @@
 # Ignored files and directories #
 #################################
 *.log
-.env
+#.env
 vendor/
+/.idea
+gorest.exe
