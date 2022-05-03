@@ -79,6 +79,7 @@ func InitDB() *gorm.DB {
 		db, err = gorm.Open(mysql.New(mysql.Config{
 			Conn: sqlDB,
 		}), &gorm.Config{
+			DisableForeignKeyConstraintWhenMigrating: true,
 			Logger: logger.Default.LogMode(logger.LogLevel(logLevel)),
 		})
 		if err != nil {

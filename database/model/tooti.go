@@ -4,33 +4,49 @@ import "time"
 
 type Tooti struct {
 	TootiID   uint64 `json:"tooti_id" gorm:"primaryKey"`
-	MediaID   uint64 `json:"media_id"` // TODO relation
-	HashtagID uint64 `json:"hashtags"` // TODO relation slice
-	Title 	  string `json:"title"` // TODO title nullable
-	DeviceID  uint64 `json:"device_id"` // TODO relation
+	Title 	  string `json:"title" gorm:"default:null"`
 	CreatedAt time.Time `json:"created_at"`
+
+	// relation
+	MediaID   uint64 `json:"media_id"`
+	Hashtags []*Hashtag `json:"hashtags" gorm:"many2many:tooti_hashtags"`
+
+	DeviceID  uint64 `json:"device_id"`
+	Bookmark []Bookmark `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Qoute []Qoute `json:"qoute" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ReTooti []ReTooti `json:"re_tooti" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
+	CommentID uint64 `json:"comment_id"`
+
 }
 
 type Qoute struct {
 	QouteID   	uint64 `json:"qoute_id" gorm:"primaryKey"`
-	MediaID   	uint64 `json:"media_id"` // TODO relation
-	HashtagID 	uint64 `json:"hashtags"` // TODO relation slice
-	Title 	  	string `json:"title"` // TODO title nullable
-	DeviceID    uint64 `json:"device_id"` // TODO relation
+	MediaID   	uint64 `json:"media_id"`
+	Title 	  	string `json:"title" gorm:"default:null"`
 	CreatedAt   time.Time `json:"created_at"`
+	Hashtags 	[]*Hashtag `json:"hashtags" gorm:"many2many:qoute_hashtags"`
+	DeviceID    uint64 `json:"device_id"` // one to has many
+	TootiID     uint64 `json:"tooti_id"` // one to has many
+	FromQouteID *uint64 `json:"from_qoute_id"` // self refrencial has many
+	Qoutes 	    []Qoute `json:"qoutes" gorm:"foreignkey:FromQouteID"` // self refrencial has many
 
-	TootiID     uint64 `json:"tooti_id"` // TODO relation
-	FromQouteID uint64 `json:"from_qoute_id"` // TODO relation
-	ReTootiID   uint64 `json:"re_tooti_id"` // TODO relation
+	// relation
+	CommentID uint64 `json:"comment_id"`
+	ReTooti  []*ReTooti `json:"re_tooti" gorm:"many2many:qoute_retooties"`
+	Bookmark []Bookmark `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type ReTooti struct {
-	ReTootiID  uint64 `json:"re_tooti_id" gorm:"primaryKey"`
-	DeviceID uint64 `json:"device_id"`// TODO relation
+	ReTootiID  	uint64 `json:"re_tooti_id" gorm:"primaryKey"`
+	Devices 	[]*Device `json:"devices" gorm:"many2many:retooti_devices"`
+	Hashtags 	[]*Hashtag `json:"hashtags" gorm:"many2many:retooti_hashtags"`
+	TootiID     uint64 `json:"tooti_id"`
+	FromReTooti uint64 `json:"from_re_tooti"` //  self refrencial has many
+	ReTooties   []ReTooti `json:"re_tooties" gorm:"foreignkey:FromReTooti"` // self refrencial has many
+	// relation
+	Bookmark 	[]Bookmark `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Qoutes  []*Qoute `json:"qoutes" gorm:"many2many:qoute_retooties"`
+	CommentID uint64 `json:"comment_id"`
 
-	QouteID uint64 `json:"from_qoute_id"` // TODO relation
-	TootiID     uint64 `json:"tooti_id"` // TODO relation
-	FromReTooti uint64 `json:"from_re_tooti"` // TODO relation
 }
-
-

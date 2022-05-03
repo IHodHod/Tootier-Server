@@ -11,14 +11,25 @@ type User struct {
 	PhoneNumber *string `json:"phone_number"`
 	RegisterTime time.Time `json:"register_time"`
 	UserGeo `gorm:"embedded"`
-	RoleID uint64 `json:"role_id"` // TODO Relation
-	ProfileID uint64 `json:"profile_id"` // TODO Relation
+	Role []*Role `gorm:"many2many:user_roles;"`
+	ProfileID uint64 `json:"profile_id"`
+	Profile Profile `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
+	Device []Device `json:"devices" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Bookmark []Bookmark `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
+	Following []Following `json:"followings" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	FollowingUser []Following `json:"following_users" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:FollowingUserID"`
+
+	Follower 	 []Follower  `json:"followers" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	FollowerUser []Follower  `json:"follower_users" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:FollowerUserID"`
 	//IDAuth    uint64         `json:"-"`
 }
 
 type Role struct {
 	RoleID uint64 `json:"role_id" gorm:"primaryKey"`
 	RoleName string `json:"role_name"`
+	User []*User `gorm:"many2many:user_roles;"`
 }
 
 type UserGeo struct {
