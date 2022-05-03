@@ -3,5 +3,5 @@
 *.log
 #.env
 vendor/
-/.idea
+.idea/
 gorest.exe
