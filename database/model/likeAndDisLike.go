@@ -1,22 +1,23 @@
 package model
 
+import "time"
 
 type Like struct {
-	LikeID uint64 `json:"like_id" gorm:"primaryKey"`
-	UserID uint64 `json:"user_id"` // TODO relation
-	TootiLikeTime uint64 `json:"tooti_like_time"`
-
-	TootiID uint64 `json:"tooti_id"` // TODO relation
-	QouteID uint64 `json:"qoute_id"` 	  // TODO relation
-	ReTootiID uint64 `json:"re_tooti_id"` // TODO relation
+	LikeID        uint64    `json:"like_id" gorm:"primaryKey"`
+	UserID        uint64    `json:"user_id"`
+	TootiLikeTime time.Time `json:"tooti_like_time"`
+	TootiID       uint64    `json:"tooti_id"`
+	QouteID       uint64    `json:"qoute_id"`
+	ReTootiID     uint64    `json:"re_tooti_id"`
+	Notifes       []Notify  `json:"notifes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type DisLike struct {
-	DisLikeID uint64 `json:"dis_like_id" gorm:"primaryKey"`
-	UserID uint64 `json:"user_id"` // TODO relation
-	TootiLikeTime uint64 `json:"tooti_like_time"`
-
-	TootiID uint64 `json:"tooti_id"` // TODO relation
-	QouteID uint64 `json:"qoute_id"` 	  // TODO relation
-	ReTootiID uint64 `json:"re_tooti_id"` // TODO relation
+	DisLikeID     uint64    `json:"dis_like_id" gorm:"primaryKey"`
+	UserID        uint64    `json:"user_id"`
+	TootiLikeTime time.Time `json:"tooti_like_time"`
+	TootiID       uint64    `json:"tooti_id"`
+	QouteID       uint64    `json:"qoute_id"`
+	ReTootiID     uint64    `json:"re_tooti_id"`
+	Notifes       []Notify  `json:"notifes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
