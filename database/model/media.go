@@ -5,6 +5,7 @@ package model
 type Media struct {
 	MediaID   uint64 `json:"media_id" gorm:"primaryKey"`
 	VoiceURL  string
+	ImageURL  string
 	TootiID   uint64  `json:"tooti_id"`
 	Tooti     Tooti   `json:"tooti" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	QouteID   uint64  `json:"qoute_id"`

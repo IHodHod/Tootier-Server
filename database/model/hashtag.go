@@ -10,9 +10,8 @@ type Hashtag struct {
 	Tooties    []*Tooti   `json:"tooties" gorm:"many2many:tooti_hashtags"`
 	Qoutes     []*Qoute   `json:"qoutes" gorm:"many2many:qoute_hashtags"`
 	ReTooties  []*ReTooti `json:"re_tooties" gorm:"many2many:retooti_hashtags"`
-	Comments  []*Comment `json:"comments"  gorm:"many2many:comments_hashtags"`
+	Comments   []*Comment `json:"comments"  gorm:"many2many:comment_hashtags"`
 }
-
 
 type HashMain struct {
 	HashMainID uint64 `json:"hash_main_id" gorm:"primaryKey"`

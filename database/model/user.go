@@ -5,12 +5,14 @@ import "time"
 // User model - `users` table
 type User struct {
 	UserID          uint64    `json:"user_id" gorm:"primaryKey"`
-	UserName        *string   `json:"user_name"`
+	UserName        *string   `json:"user_name" gorm:"unique"`
 	Password        string    `json:"password"`
 	Name            string    `json:"name"`
-	PhoneNumber     *string   `json:"phone_number"`
+	Email           *string   `json:"email" gorm:"unique"`
+	PhoneNumber     *string   `json:"phone_number" gorm:"unique"`
 	RegisterTime    time.Time `json:"register_time"`
 	UserGeo         `gorm:"embedded"`
+	Comments        []Comment        `json:"comments" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CommentLikes    []CommentLike    `json:"comment_likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CommentDisLikes []CommentDisLike `json:"comment_dis_likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Likes           []Like           `json:"likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -28,6 +30,10 @@ type User struct {
 	Mentioneds      []Mention        `json:"mentioneds" gorm:"foreignkey:MentionedUserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Notifes         []Notify         `json:"notifes" gorm:"foreignkey:ToUserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Views           []View           `json:"views" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Tooties         []Tooti          `json:"tooties"`
+	ReTooties       []ReTooti        `json:"re_tooties"`
+	Qoutes          []Qoute          `json:"qoutes"`
+
 	//IDAuth    uint64         `json:"-"`
 }
 
