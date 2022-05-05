@@ -42,13 +42,13 @@ type Qoute struct {
 }
 
 type ReTooti struct {
-	ReTootiID   uint64     `json:"re_tooti_id" gorm:"primaryKey" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
-	UserID      uint64     `json:"user_id" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
+	ReTootiID   uint64     `json:"re_tooti_id" gorm:"primaryKey"`
+	UserID      uint64     `json:"user_id"`
 	Hashtags    []*Hashtag `json:"hashtags" gorm:"many2many:retooti_hashtags"`
-	TootiID     uint64     `json:"tooti_id" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
-	QouteID     uint64     `json:"qoute_id" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
-	FromReTooti uint64     `json:"from_re_tooti" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"` //  self refrencial has many
-	ReTooties   []ReTooti  `json:"re_tooties" gorm:"foreignkey:FromReTooti"`            // self refrencial has many
+	TootiID     uint64     `json:"tooti_id"`
+	QouteID     uint64     `json:"qoute_id"`
+	FromReTooti uint64     `json:"from_re_tooti"`                            //  self refrencial has many
+	ReTooties   []ReTooti  `json:"re_tooties" gorm:"foreignkey:FromReTooti"` // self refrencial has many
 	Bookmark    []Bookmark `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
 	Qoutes      []Qoute    `json:"qoutes"`
 	Comments    []Comment  `json:"comments" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `

@@ -4,13 +4,13 @@ import "time"
 
 // User model - `users` table
 type User struct {
-	UserID          uint64    `json:"user_id" gorm:"primaryKey" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
-	UserName        *string   `json:"user_name" gorm:"unique" faker:"username"`
-	Password        string    `json:"password" faker:"password"`
-	Name            string    `json:"name" faker:"name"`
-	Email           *string   `json:"email" gorm:"unique" faker:"email"`
-	PhoneNumber     *string   `json:"phone_number" gorm:"unique" faker:"phone_number"`
-	RegisterTime    time.Time `json:"register_time" faker:"time"`
+	UserID          uint64    `json:"user_id" gorm:"primaryKey"`
+	UserName        *string   `json:"user_name" gorm:"unique"`
+	Password        string    `json:"password"`
+	Name            string    `json:"name"`
+	Email           *string   `json:"email" gorm:"unique"`
+	PhoneNumber     *string   `json:"phone_number" gorm:"unique"`
+	RegisterTime    time.Time `json:"register_time"`
 	UserGeo         `gorm:"embedded"`
 	Comments        []Comment        `json:"comments" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CommentLikes    []CommentLike    `json:"comment_likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -38,8 +38,8 @@ type User struct {
 }
 
 type Role struct {
-	RoleID   uint64  `json:"role_id" gorm:"primaryKey" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
-	RoleName string  `json:"role_name" faker:"name"`
+	RoleID   uint64  `json:"role_id" gorm:"primaryKey"`
+	RoleName string  `json:"role_name"`
 	User     []*User `gorm:"many2many:user_roles;"`
 }
 
