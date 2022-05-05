@@ -1,16 +1,14 @@
 package model
 
-import "time"
-
 // User model - `users` table
 type User struct {
-	UserID          uint64    `json:"user_id" gorm:"primaryKey"`
-	UserName        *string   `json:"user_name" gorm:"unique"`
-	Password        string    `json:"password"`
-	Name            string    `json:"name"`
-	Email           *string   `json:"email" gorm:"unique"`
-	PhoneNumber     *string   `json:"phone_number" gorm:"unique"`
-	RegisterTime    time.Time `json:"register_time"`
+	UserID          uint64 `json:"user_id" gorm:"primaryKey"`
+	UserName        string `json:"user_name" gorm:"unique"`
+	Password        string `json:"password"`
+	Name            string `json:"name"`
+	Email           string `json:"email" gorm:"unique"`
+	PhoneNumber     string `json:"phone_number" gorm:"unique"`
+	RegisterTime    string `json:"register_time"`
 	UserGeo         `gorm:"embedded"`
 	Comments        []Comment        `json:"comments" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	CommentLikes    []CommentLike    `json:"comment_likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
@@ -18,7 +16,7 @@ type User struct {
 	Likes           []Like           `json:"likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	DisLikes        []DisLike        `json:"dis_likes" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Role            []*Role          `gorm:"many2many:user_roles;" `
-	ProfileID       uint64           `json:"profile_id" faker:"oneof: 1, 2, 3,4,5,6,7,8,9,10"`
+	ProfileID       uint64           `json:"profile_id" `
 	Profile         Profile          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
 	Device          []Device         `json:"devices" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
 	Bookmark        []Bookmark       `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

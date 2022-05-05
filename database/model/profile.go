@@ -11,7 +11,7 @@ type Profile struct {
 	Birthday        time.Time  `json:"birthday"`
 	Gender          uint8      `json:"gender"`
 	EnableNotify    bool       `json:"enable_notify" gorm:"default:true"`
-	Hashtags        []*Hashtag `json:"hashtags"`
+	Hashtags        []*Hashtag `json:"hashtags" gorm:"many2many:profile_hashtags"`
 
 	Mentions []Mention `json:"mentions" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
