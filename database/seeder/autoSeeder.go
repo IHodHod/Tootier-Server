@@ -16,15 +16,14 @@ func main() {
 
 	result := db.Create(&modelCreated)
 	if result.Error != nil {
-		fmt.Println("Error in insert data to DB " + result.Error.Error())
+		fmt.Println("Error in insert data to DB" + result.Error.Error())
 		os.Exit(1)
 	}
 
-
-	fmt.Printf("Row count added %v " , result.RowsAffected)
+	fmt.Printf("Row count added %v", result.RowsAffected)
 }
 
-func prepareModel() *model.Device  {
+func prepareModel() *model.Device {
 	device := &model.Device{}
 	err := faker.FakeData(device)
 	if err != nil {
@@ -32,11 +31,5 @@ func prepareModel() *model.Device  {
 		os.Exit(1)
 	}
 
-	return  device
+	return device
 }
-
-
-
-
-
-

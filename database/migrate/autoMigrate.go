@@ -80,9 +80,9 @@ func main() {
 
 func dropAllTables() {
 	// Careful! It will drop all the tables!
-	if err := db.Migrator().DropTable(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
-	&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
-	&commentLike{} , &commentDisLike{} , &device{}); err != nil {
+	if err := db.Migrator().DropTable(&bookmark{}, &user{}, &media{}, &profile{}, &view{}, &tooti{}, &comment{},
+		&follower{}, &following{}, &notify{}, &mention{}, &role{}, &hashtag{}, &hashMain{}, &like{}, &disLike{},
+		&commentLike{}, &commentDisLike{}, &device{}); err != nil {
 		errorState = 1
 		fmt.Println(err)
 	} else {
@@ -96,18 +96,18 @@ func migrateTables() {
 
 	if driver == "mysql" {
 		// db.Set() --> add table suffix during auto migration
-		if err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
-			&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
-			&commentLike{} , &commentDisLike{} , &device{}); err != nil {
+		if err := db.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(&bookmark{}, &user{}, &media{}, &profile{}, &view{}, &tooti{}, &comment{},
+			&follower{}, &following{}, &notify{}, &mention{}, &role{}, &hashtag{}, &hashMain{}, &like{}, &disLike{},
+			&commentLike{}, &commentDisLike{}, &device{}); err != nil {
 			errorState = 1
 			fmt.Println(err)
 		} else {
 			fmt.Println("New tables are  migrated successfully!")
 		}
 	} else {
-		if err := db.AutoMigrate(&bookmark{}, &user{}, &media{} , &profile{} , &view{} , &tooti{} , &comment{} ,
-			&follower{} , &following{} , &notify{} , &mention{} , &role{} , &hashtag{} , &hashMain{} , &like{} , &disLike{} ,
-			&commentLike{} , &commentDisLike{} , &device{}); err != nil {
+		if err := db.AutoMigrate(&bookmark{}, &user{}, &media{}, &profile{}, &view{}, &tooti{}, &comment{},
+			&follower{}, &following{}, &notify{}, &mention{}, &role{}, &hashtag{}, &hashMain{}, &like{}, &disLike{},
+			&commentLike{}, &commentDisLike{}, &device{}); err != nil {
 			errorState = 1
 			fmt.Println(err)
 		} else {
