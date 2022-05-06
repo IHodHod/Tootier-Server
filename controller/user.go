@@ -1,16 +1,43 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pilinux/gorest/database"
+	"github.com/pilinux/gorest/database/model"
+	"github.com/pilinux/gorest/lib/renderer"
 )
 
 // GetUsers - GET /users
+type result struct {
+	DeviceName string
+}
+
 func GetUsers(c *gin.Context) {
-	//db := database.GetDB()
-	//users := []model.User{}
-	//posts := []model.Post{}
-	//hobbies := []model.Hobby{}
-	//
+	db := database.GetDB()
+	users := model.User{
+		UserID: 1,
+	}
+	err := db.Select("Devices").Delete(users)
+
+	if err != nil {
+		fmt.Println(err)
+		renderer.Render(c , gin.H{"status":"error"} , 500)
+	}
+
+	//db.Preload(clause.Associations).Find(&users)
+
+	//device := []model.Device{}
+
+	//db.Find(&users).Model()
+	//db.Find(&device)
+
+	//:= db.Model(&model.User{}).Select("*" +
+	//"").Joins("left join user.user_id on devices.user_id = user.user.id").
+	//Scan(&result{})
+
+	renderer.Render(c , gin.H{"status":"success"} , 202)
+	//renderer.Render(c, users, http.StatusOK)
 }
 
 // GetUser - GET /users/:id

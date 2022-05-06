@@ -18,7 +18,7 @@ type User struct {
 	Role            []*Role          `gorm:"many2many:user_roles;" `
 	ProfileID       uint64           `json:"profile_id" `
 	Profile         Profile          `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
-	Device          []Device         `json:"devices" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" `
+	Devices          []Device         `json:"devices" `
 	Bookmark        []Bookmark       `json:"bookmarks" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Following       []Following      `json:"followings" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	FollowingUser   []Following      `json:"following_users" gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:FollowingUserID"`

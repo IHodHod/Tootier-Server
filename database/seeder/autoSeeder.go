@@ -8,7 +8,7 @@ import (
 	"math/rand"
 )
 
-const NumberOfInsertModel = 20
+const NumberOfInsertModel =5
 
 func main() {
 	database.InitDB()

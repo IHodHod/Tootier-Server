@@ -4,14 +4,12 @@ import (
 	// "fmt"
 
 	"fmt"
-	"io"
-	"os"
-	"time"
-
 	"github.com/pilinux/gorest/config"
 	"github.com/pilinux/gorest/controller"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/lib/middleware"
+	"io"
+	"os"
 
 	"github.com/gin-gonic/gin"
 )
@@ -83,10 +81,10 @@ func SetupRouter() (*gin.Engine, error) {
 	//	gin.DisableConsoleColor()
 
 	// Create a log file with start time
-	dt := time.Now()
-	t := dt.Format(time.RFC822)
+	//dt := time.Now()
+	//t := dt.Format(time.RFC822)
 
-	file, err := os.Create("./logs/start-" + t + ".log")
+	file, err := os.Create("./logs/start.txt")
 	if err != nil {
 		return nil, err
 	}
@@ -135,42 +133,41 @@ func SetupRouter() (*gin.Engine, error) {
 	//router.Use(middleware.Pongo2())
 
 	// API:v1.0
-	v1 := router.Group("/api/v1/")
+	v1 := router.Group("/api/v1/") // localhost:3000//api/v1/
 	{
 		// RDBMS
 		if configure.Database.RDBMS.Activate == "yes" {
+			user := v1.Group("user") // localhost:300//api/v1/user
+			user.GET("all" , controller.GetUsers)
+
 			// Register - no JWT required
-			v1.POST("register", controller.CreateUserAuth)
+			//v1.POST("register", controller.CreateUserAuth)
 
 			// Login - app issues JWT
-			v1.POST("login", controller.Login)
+			//v1.POST("login", controller.Login)
 
 			// Refresh - app issues new JWT
-			rJWT := v1.Group("refresh")
-			rJWT.Use(middleware.RefreshJWT())
-			rJWT.POST("", controller.Refresh)
+			//rJWT := v1.Group("refresh")
+			//rJWT.Use(middleware.RefreshJWT())
+			//rJWT.POST("", controller.Refresh)
 
 			// User
-			rUsers := v1.Group("users")
-			rUsers.GET("", controller.GetUsers)    // Non-protected
-			rUsers.GET("/:id", controller.GetUser) // Non-protected
-			rUsers.Use(middleware.JWT())
-			rUsers.POST("", controller.CreateUser)      // Protected
-			rUsers.PUT("", controller.UpdateUser)       // Protected
-			rUsers.PUT("/hobbies", controller.AddHobby) // Protected
+			//rUsers := v1.Group("users")
+			//rUsers.GET("", controller.GetUsers)    // Non-protected
+			//rUsers.GET("/:id", controller.GetUser) // Non-protected
+			//rUsers.Use(middleware.JWT())
+			//rUsers.POST("", controller.CreateUser)      // Protected
+			//rUsers.PUT("", controller.UpdateUser)       // Protected
+			//rUsers.PUT("/hobbies", controller.AddHobby) // Protected
 
 			// Post
-			rPosts := v1.Group("posts")
-			rPosts.GET("", controller.GetPosts)    // Non-protected
-			rPosts.GET("/:id", controller.GetPost) // Non-protected
-			rPosts.Use(middleware.JWT())
-			rPosts.POST("", controller.CreatePost)       // Protected
-			rPosts.PUT("/:id", controller.UpdatePost)    // Protected
-			rPosts.DELETE("/:id", controller.DeletePost) // Protected
-
-			// Hobby
-			rHobbies := v1.Group("hobbies")
-			rHobbies.GET("", controller.GetHobbies) // Non-protected
+			//rPosts := v1.Group("posts")
+			//rPosts.GET("", controller.GetPosts)    // Non-protected
+			//rPosts.GET("/:id", controller.GetPost) // Non-protected
+			//rPosts.Use(middleware.JWT())
+			//rPosts.POST("", controller.CreatePost)       // Protected
+			//rPosts.PUT("/:id", controller.UpdatePost)    // Protected
+			//rPosts.DELETE("/:id", controller.DeletePost) // Protected
 		}
 
 		// REDIS Playground
@@ -198,13 +195,13 @@ func SetupRouter() (*gin.Engine, error) {
 		}*/
 
 		// Basic Auth demo
-		user := configure.Security.BasicAuth.Username
-		pass := configure.Security.BasicAuth.Password
-		rBasicAuth := v1.Group("access_resources")
-		rBasicAuth.Use(gin.BasicAuth(gin.Accounts{
-			user: pass,
-		}))
-		rBasicAuth.GET("", controller.AccessResource) // Protected
+		//user := configure.Security.BasicAuth.Username
+		//pass := configure.Security.BasicAuth.Password
+		//rBasicAuth := v1.Group("access_resources")
+		//rBasicAuth.Use(gin.BasicAuth(gin.Accounts{
+		//	user: pass,
+		//}))
+		//rBasicAuth.GET("", controller.AccessResource) // Protected
 	}
 
 	return router, nil
