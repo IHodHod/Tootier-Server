@@ -5,12 +5,34 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
+	"github.com/pilinux/gorest/global"
+	"github.com/pilinux/gorest/io_models"
 	"github.com/pilinux/gorest/lib/renderer"
+	"net/http"
 )
 
-// GetUsers - GET /users
-type result struct {
-	DeviceName string
+
+func FindUserByUsername(c *gin.Context) {
+	findUserName := io_models.FindUserName{}
+	status := global.CreateStatus()
+	err := c.BindUri(&findUserName) ; if err != nil {
+		status.Code = http.StatusBadRequest
+		status.Message = global.GetLang().MSG_ERR
+		renderer.Render(c , status.ToGin(), status.Code)
+		return
+	}
+
+	db := database.GetDB()
+	db.Table("users").Select("user_id").Where("user_name = ?" , findUserName.Username).Scan(&findUserName)
+
+
+	var defined = false
+	if (findUserName.UserID > 0) {
+		defined = true
+	}
+
+	status.Data = gin.H{"defined" : defined}
+	renderer.Render(c , status.ToGin() ,  status.Code)
 }
 
 func GetUsers(c *gin.Context) {

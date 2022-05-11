@@ -1,0 +1,13 @@
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] GET    /api/v1/user/all          --> github.com/pilinux/gorest/controller.GetUsers (5 handlers)
+[GIN-debug] GET    /api/v1/user/username/:username --> github.com/pilinux/gorest/controller.FindUserByUsername (5 handlers)
+[GIN-debug] POST   /api/v1/auth/signup       --> github.com/pilinux/gorest/controller.CreateUserAuth (5 handlers)
+[GIN-debug] POST   /api/v1/auth/login        --> github.com/pilinux/gorest/controller.Login (5 handlers)
+[GIN-debug] Listening and serving HTTP on :3000
+[GIN] 2022/05/11 - 12:38:17 | 200 |    114.6305ms |             ::1 | GET      "/api/v1/user/username/hossein"
+[GIN] 2022/05/11 - 12:38:40 | 200 |     97.8574ms |             ::1 | GET      "/api/v1/user/username/hosseinzafafri"

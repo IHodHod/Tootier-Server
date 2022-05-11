@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/pilinux/gorest/io_models"
 
 	"gorm.io/gorm"
 
@@ -13,7 +14,7 @@ import (
 )
 
 // Load all the models
-type auth model.Auth
+type auth io_models.Register
 type user model.User
 type post model.Post
 type hobby model.Hobby

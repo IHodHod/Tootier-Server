@@ -1,0 +1,35 @@
+
+// find association
+err := db.Model(&users).Association("Devices").Find(&devices)
+
+
+// append
+err := db.Model(&users).Association("Devices").Append([]model.Device{model.Device{
+    Hardware: model.Hardware{
+        DeviceName: "Iphone",
+        MacAddress: "32:34:90:22:90",
+        OS:         "IOS",
+        IP:         "192.182.14.4",
+        DeviceUUID: "osbsfobifsfswb989989898989894747fwifbwf",
+    },
+    Token:              "sofsio5fbsfbw",
+    LastTimeVisit:      "12:23",
+    RegisterTimeDevice: "12:32",
+},model.Device{
+    Hardware: model.Hardware{
+        DeviceName: "Android s19",
+        MacAddress: "32:34:90:3d:3w",
+        OS:         "Android",
+        IP:         "195.182.14.4",
+        DeviceUUID: "osbfobisw5524234234242wrwsfwbfwifbwf",
+    },
+    Token:              "sssff24242424wfw2w2fsfwrerer",
+    LastTimeVisit:      "12:22",
+    RegisterTimeDevice: "12:12",
+},})
+
+
+// delete
+err := db.Select("Devices").Delete(users)
+
+
