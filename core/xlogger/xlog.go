@@ -5,25 +5,29 @@ import (
 )
 
 const (
-	VERBOSE = 0
-	INFO    = 1
-	DEBUG   = 2
-	WARNING = 3
-	ERROR   = 4
-	EMPTY   = 10
+	LEVEL_VERBOSE = 0
+	LEVEL_INFO    = 1
+	LEVEL_DEBUG         = 2
+	LEVEL_WARNING       = 3
+	LEVEL_ERROR         = 4
+	LEVEL_EMPTY         = 10
 )
 
-// log.warn()
-// level = error
+const (
+	COLOR_RED    = "\033[31m"
+	COLOR_YELLOW = "\033[33m"
+	COLOR_WHITE  = "\033[37m"
+	COLOR_BLUE   = "\033[34m"
+	COLOR_CYAN   = "\033[36m"
+	COLOR_GREEN  = "\033[32m"
+	RESET        = "\033[0m"
+)
 
 type Level int8
 
-var LogLevel Level = VERBOSE
+var LogLevel Level = LEVEL_VERBOSE
 var DefaultTag = ""
 
-func Debug(msg string) {
-	showLog(msg, DEBUG)
-}
 
 func showLog(msg string, levelStatus Level) {
 	if LogLevel > levelStatus {
@@ -31,36 +35,39 @@ func showLog(msg string, levelStatus Level) {
 	}
 
 	switch levelStatus {
-	case VERBOSE:
-		fmt.Println("------------------------------ VERBOSE : " + DefaultTag + " # " + msg)
+	case LEVEL_VERBOSE:
+		fmt.Println(string(COLOR_GREEN), "🤗  <------------------------------     VERBOSE :    ["+DefaultTag+"] # "+msg, string(RESET))
 		return
-	case INFO:
-		fmt.Println("------------------------------ INFO : " + DefaultTag + " # " + msg)
+	case LEVEL_INFO:
+		fmt.Println(string(COLOR_CYAN), "😏  <------------------------------     INFO :       ["+DefaultTag+"] # "+msg, string(RESET))
 		return
-	case DEBUG:
-		fmt.Println("------------------------------ DEBUG : " + DefaultTag + " # " + msg)
+	case LEVEL_DEBUG:
+		fmt.Println(string(COLOR_BLUE), "🤕  <------------------------------     DEBUG :      ["+DefaultTag+"] # "+msg, string(RESET))
 		return
-	case WARNING:
-		fmt.Println("------------------------------ WARNING : " + DefaultTag + " # " +  msg)
+	case LEVEL_WARNING:
+		fmt.Println(string(COLOR_YELLOW), "😵  <------------------------------     WARNING :    ["+DefaultTag+"] # "+msg, string(RESET))
 		return
-	case ERROR:
-		fmt.Println("------------------------------ ERROR : " + DefaultTag + " # " + msg)
+	case LEVEL_ERROR:
+		fmt.Println(string(COLOR_RED), "💩  <------------------------------     ERROR :      [" + DefaultTag+"] # "+msg, string(RESET))
 		return
 	}
 }
 
 func Verbose(msg string) {
-	showLog(msg, VERBOSE)
+	showLog(msg, LEVEL_VERBOSE)
 }
 
 func Info(msg string) {
-	showLog(msg, INFO)
+	showLog(msg, LEVEL_INFO)
 }
 
+func Debug(msg string) {
+	showLog(msg, LEVEL_DEBUG)
+}
 func Err(msg string) {
-	showLog(msg, ERROR)
+	showLog(msg, LEVEL_ERROR)
 }
 
 func Warn(msg string) {
-	showLog(msg, WARNING)
+	showLog(msg, LEVEL_WARNING)
 }

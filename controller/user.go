@@ -37,8 +37,12 @@ func UserNameAvailable(c *gin.Context) {
 }
 
 func Test(c *gin.Context) {
-	xlogger.Warn("warn")
-	xlogger.Err("err")
+	xlogger.Verbose("verbose")
+	xlogger.Info("information test")
+	xlogger.Debug("debug tests")
+	xlogger.Warn("warning tests")
+	xlogger.Err("error test")
+
 	user := model.User{
 		UserName: c.Param("username"),
 		Email: c.Param("email"),

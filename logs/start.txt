@@ -8,9 +8,6 @@
 [GIN-debug] GET    /api/v1/user/username/:username --> github.com/pilinux/gorest/controller.UserNameAvailable (5 handlers)
 [GIN-debug] POST   /api/v1/auth/signup       --> github.com/pilinux/gorest/controller.Test (5 handlers)
 [GIN-debug] Listening and serving HTTP on :3000
-[GIN] 2022/05/15 - 12:47:07 | 200 |    124.4435ms |             ::1 | POST     "/api/v1/auth/signup"
-[GIN] 2022/05/15 - 12:47:09 | 200 |     120.603ms |             ::1 | POST     "/api/v1/auth/signup"
-[GIN] 2022/05/15 - 12:47:09 | 200 |     99.6935ms |             ::1 | POST     "/api/v1/auth/signup"
-[GIN] 2022/05/15 - 12:47:10 | 200 |     112.748ms |             ::1 | POST     "/api/v1/auth/signup"
-[GIN] 2022/05/15 - 12:47:16 | 200 |    110.2992ms |             ::1 | POST     "/api/v1/auth/signup"
-[GIN] 2022/05/15 - 12:47:16 | 200 |      97.905ms |             ::1 | POST     "/api/v1/auth/signup"
+[GIN] 2022/05/15 - 13:28:40 | 200 |    190.7911ms |             ::1 | POST     "/api/v1/auth/signup"
+[GIN] 2022/05/15 - 13:28:48 | 200 |     99.0311ms |             ::1 | POST     "/api/v1/auth/signup"
+[GIN] 2022/05/15 - 13:28:48 | 200 |     84.0111ms |             ::1 | POST     "/api/v1/auth/signup"

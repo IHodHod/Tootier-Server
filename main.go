@@ -19,7 +19,7 @@ var configure = config.Config()
 
 func main() {
 	xlogger.DefaultTag = "Tootier"
-	xlogger.LogLevel = xlogger.EMPTY
+	xlogger.LogLevel = xlogger.LEVEL_VERBOSE
 
 	if configure.Database.RDBMS.Activate == "yes" {
 		// Initialize RDBMS client
