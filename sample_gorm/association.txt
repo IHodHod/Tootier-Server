@@ -32,4 +32,5 @@ err := db.Model(&users).Association("Devices").Append([]model.Device{model.Devic
 // delete
 err := db.Select("Devices").Delete(users)
 
+db.Table("users").Select("user_id").Where("user_name = ?" , findUserName.Username).Scan(&findUserName)
 

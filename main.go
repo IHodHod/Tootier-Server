@@ -140,12 +140,14 @@ func SetupRouter() (*gin.Engine, error) {
 			// USER
 			user := v1.Group("user") // localhost:300//api/v1/user
 			user.GET("all" , controller.GetUsers)
-			user.GET("username/:username" , controller.FindUserByUsername) // api/v1/user/username/:username
+			user.GET("username/:username" , controller.UserNameAvailable) // api/v1/user/username/:username
 
 			// Signup
 			auth := v1.Group("auth")
-			auth.POST("signup" , controller.CreateUserAuth)
-			auth.POST("login" , controller.Login)
+			auth.POST("signup" , controller.Test) // api/v1/test
+			//
+			//auth.POST("signup" , controller.CreateUserAuth)
+			//auth.POST("login" , controller.Login)
 
 			// Register - no JWT required
 			//v1.POST("register", controller.CreateUserAuth)

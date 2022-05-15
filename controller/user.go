@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
+	"github.com/pilinux/gorest/database/transaction"
 	"github.com/pilinux/gorest/global"
 	"github.com/pilinux/gorest/io_models"
 	"github.com/pilinux/gorest/lib/renderer"
@@ -12,28 +13,73 @@ import (
 )
 
 
-func FindUserByUsername(c *gin.Context) {
+func UserNameAvailable(c *gin.Context) {
 	findUserName := io_models.FindUserName{}
 	status := global.CreateStatus()
 	err := c.BindUri(&findUserName) ; if err != nil {
 		status.Code = http.StatusBadRequest
 		status.Message = global.GetLang().MSG_ERR
+		status.Status = "error"
 		renderer.Render(c , status.ToGin(), status.Code)
 		return
 	}
 
-	db := database.GetDB()
-	db.Table("users").Select("user_id").Where("user_name = ?" , findUserName.Username).Scan(&findUserName)
-
+	result := transaction.GetUserByUserName(findUserName.Username)
 
 	var defined = false
-	if (findUserName.UserID > 0) {
+	if (result.UserID > 0) {
 		defined = true
 	}
 
 	status.Data = gin.H{"defined" : defined}
 	renderer.Render(c , status.ToGin() ,  status.Code)
 }
+
+func Test(c *gin.Context) {
+	fmt.Println("called")
+	user := model.User{
+		UserName: c.Param("username"),
+		Email: c.Param("email"),
+		PhoneNumber: c.Param("phonenumber"),
+	}
+	status := global.CreateStatus()
+	register := io_models.Register{}
+
+	if c.BindJSON(&register) != nil {
+		status.Code = http.StatusBadRequest
+		status.Message = global.GetLang().MSG_ERR
+		status.Status = "error"
+		renderer.Render(c , status.ToGin(), status.Code)
+		return
+	}
+
+	fmt.Println(register)
+	return
+
+	switch (transaction.UserIsExsits(&user)) {
+		case transaction.USERNAME :
+			status.Code = http.StatusUnauthorized
+			status.Message = global.GetLang().MSG_ERR_USERNAME_EXISTS
+			renderer.Render(c , status.ToGin() , status.Code)
+			return
+		case transaction.EMAIL :
+			status.Code = http.StatusUnauthorized
+			status.Message = global.GetLang().MSG_ERR_EMAIL_EXISTS
+			renderer.Render(c , status.ToGin() , status.Code)
+			return
+		case transaction.PHONE_NUMBER :
+			status.Code = http.StatusUnauthorized
+			status.Message = global.GetLang().MSG_ERR_PHONENUMBER_EXISTS
+			renderer.Render(c , status.ToGin(), status.Code)
+			return
+	}
+
+
+
+
+	renderer.Render(c , gin.H{"result" : "اوکیه"} , 200)
+}
+
 
 func GetUsers(c *gin.Context) {
 	db := database.GetDB()
@@ -60,16 +106,6 @@ func GetUsers(c *gin.Context) {
 
 	renderer.Render(c , gin.H{"status":"success"} , 202)
 	//renderer.Render(c, users, http.StatusOK)
-}
-
-// GetUser - GET /users/:id
-func GetUser(c *gin.Context) {
-	//db := database.GetDB()
-	//id := c.Params.ByName("id")
-	//user := model.User{}
-	//posts := []model.Post{}
-	//hobbies := []model.Hobby{}
-	//
 }
 
 // CreateUser - POST /users
