@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/pilinux/gorest/core/xlogger"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
 	"github.com/pilinux/gorest/database/transaction"
@@ -36,7 +37,8 @@ func UserNameAvailable(c *gin.Context) {
 }
 
 func Test(c *gin.Context) {
-	fmt.Println("called")
+	xlogger.Warn("warn")
+	xlogger.Err("err")
 	user := model.User{
 		UserName: c.Param("username"),
 		Email: c.Param("email"),
@@ -45,16 +47,18 @@ func Test(c *gin.Context) {
 	status := global.CreateStatus()
 	register := io_models.Register{}
 
-	if c.BindJSON(&register) != nil {
+
+	err := c.BindJSON(&register) ; if err != nil {
 		status.Code = http.StatusBadRequest
 		status.Message = global.GetLang().MSG_ERR
 		status.Status = "error"
+
+		fmt.Println("err" + err.Error())
+
 		renderer.Render(c , status.ToGin(), status.Code)
 		return
 	}
 
-	fmt.Println(register)
-	return
 
 	switch (transaction.UserIsExsits(&user)) {
 		case transaction.USERNAME :

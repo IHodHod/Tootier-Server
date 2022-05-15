@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pilinux/gorest/config"
 	"github.com/pilinux/gorest/controller"
+	"github.com/pilinux/gorest/core/xlogger"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/lib/middleware"
 	"io"
@@ -17,6 +18,9 @@ import (
 var configure = config.Config()
 
 func main() {
+	xlogger.DefaultTag = "Tootier"
+	xlogger.LogLevel = xlogger.EMPTY
+
 	if configure.Database.RDBMS.Activate == "yes" {
 		// Initialize RDBMS client
 		if err := database.InitDB().Error; err != nil {
