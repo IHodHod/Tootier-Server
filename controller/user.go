@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	uuid2 "github.com/gofrs/uuid"
 	"github.com/pilinux/gorest/core/xlogger"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
@@ -11,29 +12,32 @@ import (
 	"github.com/pilinux/gorest/io_models"
 	"github.com/pilinux/gorest/lib/renderer"
 	"net/http"
+	"runtime"
+	"strconv"
+	"strings"
 )
-
 
 func UserNameAvailable(c *gin.Context) {
 	findUserName := io_models.FindUserName{}
 	status := global.CreateStatus()
-	err := c.BindUri(&findUserName) ; if err != nil {
+	err := c.BindUri(&findUserName)
+	if err != nil {
 		status.Code = http.StatusBadRequest
 		status.Message = global.GetLang().MSG_ERR
 		status.Status = "error"
-		renderer.Render(c , status.ToGin(), status.Code)
+		renderer.Render(c, status.ToGin(), status.Code)
 		return
 	}
 
 	result := transaction.GetUserByUserName(findUserName.Username)
 
 	var defined = false
-	if (result.UserID > 0) {
+	if result.UserID > 0 {
 		defined = true
 	}
 
-	status.Data = gin.H{"defined" : defined}
-	renderer.Render(c , status.ToGin() ,  status.Code)
+	status.Data = gin.H{"defined": defined}
+	renderer.Render(c, status.ToGin(), status.Code)
 }
 
 func Test(c *gin.Context) {
@@ -43,51 +47,104 @@ func Test(c *gin.Context) {
 	xlogger.Warn("warning tests")
 	xlogger.Err("error test")
 
-	user := model.User{
-		UserName: c.Param("username"),
-		Email: c.Param("email"),
-		PhoneNumber: c.Param("phonenumber"),
-	}
 	status := global.CreateStatus()
 	register := io_models.Register{}
 
-
-	err := c.BindJSON(&register) ; if err != nil {
+	err := c.BindJSON(&register)
+	if err != nil {
 		status.Code = http.StatusBadRequest
 		status.Message = global.GetLang().MSG_ERR
 		status.Status = "error"
 
 		fmt.Println("err" + err.Error())
 
-		renderer.Render(c , status.ToGin(), status.Code)
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	}
+
+	user := model.User{
+		UserName:    register.UserName,
+		Email:       register.Email,
+		PhoneNumber: register.PhoneNumber,
+	}
+
+
+	switch transaction.UserIsExsits(&user) {
+	case transaction.USERNAME:
+		status.Code = http.StatusConflict
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR_USERNAME_EXISTS
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	case transaction.EMAIL:
+		status.Code = http.StatusConflict
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR_EMAIL_EXISTS
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	case transaction.PHONE_NUMBER:
+		status.Code = http.StatusConflict
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR_PHONENUMBER_EXISTS
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	}
+
+	uuid , err := uuid2.NewV1() ; if err != nil {
+		status.Code = http.StatusInternalServerError
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR_CAN_NOT_CERATE_USER
+		renderer.Render(c, status.ToGin(), status.Code)
 		return
 	}
 
 
-	switch (transaction.UserIsExsits(&user)) {
-		case transaction.USERNAME :
-			status.Code = http.StatusUnauthorized
-			status.Message = global.GetLang().MSG_ERR_USERNAME_EXISTS
-			renderer.Render(c , status.ToGin() , status.Code)
-			return
-		case transaction.EMAIL :
-			status.Code = http.StatusUnauthorized
-			status.Message = global.GetLang().MSG_ERR_EMAIL_EXISTS
-			renderer.Render(c , status.ToGin() , status.Code)
-			return
-		case transaction.PHONE_NUMBER :
-			status.Code = http.StatusUnauthorized
-			status.Message = global.GetLang().MSG_ERR_PHONENUMBER_EXISTS
-			renderer.Render(c , status.ToGin(), status.Code)
-			return
+	user.Password = register.Password
+	user.LatitudeX = register.Latitude
+	user.LongitudeY = register.Longitude
+	user.Name = register.Name
+	user.RegisterTime = global.CurrentTimeUnix()
+
+
+	device := model.Device{
+		Hardware:       model.Hardware{
+			DeviceName: register.DeviceName,
+			MacAddress: register.MacAddress,
+			OS:         register.OS,
+			IP:         register.Ip,
+			DeviceUUID: uuid.String(),
+		},
+		Token:              "fsfsfbibsfsfsfsfsfr3e33434343434fwifbwfi",
+		LastTimeVisit:      global.CurrentTimeUnix(),
+		RegisterTimeDevice: global.CurrentTimeUnix(),
+		UserID:             user.UserID,
+	}
+
+	if !transaction.CreateNewUser(&user , &device) {
+		status.Code = http.StatusInternalServerError
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR_CAN_NOT_CERATE_USER
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
 	}
 
 
+	// TODO : Send Verify Code To Email OR PhoneNumber
 
 
-	renderer.Render(c , gin.H{"result" : "اوکیه"} , 200)
+	renderer.Render(c, gin.H{"result": "اوکیه"}, 200)
 }
 
+func goid() int {
+	var buf [64]byte
+	n := runtime.Stack(buf[:], false)
+	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
+	id, err := strconv.Atoi(idField)
+	if err != nil {
+		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
+	}
+	return id
+}
 
 func GetUsers(c *gin.Context) {
 	db := database.GetDB()
@@ -98,7 +155,7 @@ func GetUsers(c *gin.Context) {
 
 	if err != nil {
 		fmt.Println(err)
-		renderer.Render(c , gin.H{"status":"error"} , 500)
+		renderer.Render(c, gin.H{"status": "error"}, 500)
 	}
 
 	//db.Preload(clause.Associations).Find(&users)
@@ -112,7 +169,7 @@ func GetUsers(c *gin.Context) {
 	//"").Joins("left join user.user_id on devices.user_id = user.user.id").
 	//Scan(&result{})
 
-	renderer.Render(c , gin.H{"status":"success"} , 202)
+	renderer.Render(c, gin.H{"status": "success"}, 202)
 	//renderer.Render(c, users, http.StatusOK)
 }
 

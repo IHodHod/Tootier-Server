@@ -3,10 +3,10 @@ module github.com/pilinux/gorest
 go 1.17
 
 require (
-	github.com/alexedwards/argon2id v0.0.0-20211130144151-3585854a6387
 	github.com/bxcodec/faker/v3 v3.8.0
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/gin-gonic/gin v1.7.7
+	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.4.0

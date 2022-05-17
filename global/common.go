@@ -1,7 +1,9 @@
 package global
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
+	"time"
 )
 
 type Status struct {
@@ -19,6 +21,12 @@ func CreateStatus() Status {
 	}
 }
 
+func (s *Status) Set(status string , message string , code int , data interface{})  {
+	s.Status = status
+	s.Code = code
+	s.Message = message
+	s.Data = data
+}
 
 func (s *Status) ToGin() gin.H {
 	return gin.H{
@@ -30,4 +38,7 @@ func (s *Status) ToGin() gin.H {
 
 
 
+func CurrentTimeUnix() string {
+	return fmt.Sprintf("%v" , time.Now().Unix())
+}
 

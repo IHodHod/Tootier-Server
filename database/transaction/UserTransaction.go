@@ -3,6 +3,7 @@ package transaction
 import (
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
+	"gorm.io/gorm"
 )
 
 const (
@@ -54,10 +55,28 @@ func UserIsExsits(user *model.User) int8 {
 	return EMPTY
 }
 
-//func CreateNewUser(user *model.User) bool {
-//	var db = database.GetDB()
-//	db.Create(user)
-//}
+func CreateNewUser(user *model.User , device *model.Device) bool {
+	err := database.GetDB().Transaction(func(tx *gorm.DB) error {
+		result := tx.Create(user)
+		if(result.Error != nil || result.RowsAffected < 1) {
+			return result.Error
+		}
+
+
+		device.UserID = user.UserID
+		errDevice := tx.Create(device).Error ; if errDevice != nil {
+			return errDevice
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return false
+	}
+
+	return true
+}
 
 func GetUserByID(id int64) model.User {
 	var db  = database.GetDB()
