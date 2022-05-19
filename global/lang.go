@@ -13,6 +13,7 @@ type Lang struct {
 	MSG_ERR_EMAIL_EXISTS       string
 	MSG_ERR_PHONENUMBER_EXISTS string
 	MSG_ERR_CAN_NOT_CERATE_USER string
+	MSG_SUCCESS_SIGNUP string
 }
 
 var FaLang = Lang{
@@ -22,6 +23,7 @@ var FaLang = Lang{
 	MSG_ERR_EMAIL_EXISTS:       "این ایمیل قبلا استفاده شده است",
 	MSG_ERR_PHONENUMBER_EXISTS: "این شماره موبایل قبلا استفاده شده است",
 	MSG_ERR_CAN_NOT_CERATE_USER: "خطا در ثبت نام کاربر",
+	MSG_SUCCESS_SIGNUP: "به توتیر خوش آمدید" ,
 }
 
 var EnLang = Lang{
@@ -31,6 +33,7 @@ var EnLang = Lang{
 	MSG_ERR_EMAIL_EXISTS:       "Your Email already created",
 	MSG_ERR_PHONENUMBER_EXISTS: "Your Phone Number already created",
 	MSG_ERR_CAN_NOT_CERATE_USER: "Signup user failed",
+	MSG_SUCCESS_SIGNUP: "Welcome To Tootier" ,
 }
 
 func GetLang() Lang {

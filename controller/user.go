@@ -4,17 +4,20 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	uuid2 "github.com/gofrs/uuid"
+	"github.com/golang-jwt/jwt"
 	"github.com/pilinux/gorest/core/xlogger"
 	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
 	"github.com/pilinux/gorest/database/transaction"
 	"github.com/pilinux/gorest/global"
 	"github.com/pilinux/gorest/io_models"
+	"github.com/pilinux/gorest/lib/middleware"
 	"github.com/pilinux/gorest/lib/renderer"
 	"net/http"
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func UserNameAvailable(c *gin.Context) {
@@ -68,7 +71,7 @@ func Test(c *gin.Context) {
 		PhoneNumber: register.PhoneNumber,
 	}
 
-
+	// check this user is exsits or not before new create user account
 	switch transaction.UserIsExsits(&user) {
 	case transaction.USERNAME:
 		status.Code = http.StatusConflict
@@ -90,14 +93,14 @@ func Test(c *gin.Context) {
 		return
 	}
 
-	uuid , err := uuid2.NewV1() ; if err != nil {
+	uuid, err := uuid2.NewV1()
+	if err != nil {
 		status.Code = http.StatusInternalServerError
 		status.Status = "error"
 		status.Message = global.GetLang().MSG_ERR_CAN_NOT_CERATE_USER
 		renderer.Render(c, status.ToGin(), status.Code)
 		return
 	}
-
 
 	user.Password = register.Password
 	user.LatitudeX = register.Latitude
@@ -105,22 +108,48 @@ func Test(c *gin.Context) {
 	user.Name = register.Name
 	user.RegisterTime = global.CurrentTimeUnix()
 
+	// expiretionTime for Expire Token until 60 days after created
+	expiretionTime := time.Now().Add(global.MONTH_TO_SEC * time.Second)
+	deviceUUID := uuid.String()
 
+	// Create the JWT claims, which includes the username and xxlg[deviceUUID] and expiry time
+	claims := &io_models.Claims{
+		Username: register.UserName,
+		XXLG:     deviceUUID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expiretionTime.Unix(),
+		},
+	}
+
+	// Declare the token with the algorithm used for signing, and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Create the JWT string
+	tokenString, err := token.SignedString(middleware.AccessKey)
+	if err != nil {
+		status.Code = http.StatusInternalServerError
+		status.Status = "error"
+		status.Message = global.GetLang().MSG_ERR
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	}
+
+	// model device for user signup
 	device := model.Device{
-		Hardware:       model.Hardware{
+		Hardware: model.Hardware{
 			DeviceName: register.DeviceName,
 			MacAddress: register.MacAddress,
 			OS:         register.OS,
 			IP:         register.Ip,
-			DeviceUUID: uuid.String(),
+			DeviceUUID: deviceUUID,
 		},
-		Token:              "fsfsfbibsfsfsfsfsfr3e33434343434fwifbwfi",
+		Token:              tokenString,
 		LastTimeVisit:      global.CurrentTimeUnix(),
 		RegisterTimeDevice: global.CurrentTimeUnix(),
 		UserID:             user.UserID,
 	}
 
-	if !transaction.CreateNewUser(&user , &device) {
+	if !transaction.CreateNewUser(&user, &device) {
 		status.Code = http.StatusInternalServerError
 		status.Status = "error"
 		status.Message = global.GetLang().MSG_ERR_CAN_NOT_CERATE_USER
@@ -128,11 +157,13 @@ func Test(c *gin.Context) {
 		return
 	}
 
-
 	// TODO : Send Verify Code To Email OR PhoneNumber
 
+	status.Code = http.StatusCreated
+	status.Data = gin.H{"token": tokenString}
+	status.Message = global.GetLang().MSG_SUCCESS_SIGNUP
 
-	renderer.Render(c, gin.H{"result": "اوکیه"}, 200)
+	renderer.Render(c, status.ToGin(), status.Code)
 }
 
 func goid() int {
@@ -145,6 +176,13 @@ func goid() int {
 	}
 	return id
 }
+
+// for login must with device user included
+// delete device when logout
+
+// API : access to the server
+
+// security : renew 10 minute for token
 
 func GetUsers(c *gin.Context) {
 	db := database.GetDB()
