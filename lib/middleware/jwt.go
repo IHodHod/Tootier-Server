@@ -2,6 +2,12 @@ package middleware
 
 import (
 	"fmt"
+	"github.com/pilinux/gorest/core/xlogger"
+	"github.com/pilinux/gorest/database/model"
+	"github.com/pilinux/gorest/database/transaction"
+	"github.com/pilinux/gorest/global"
+	"github.com/pilinux/gorest/io_models"
+	"github.com/pilinux/gorest/lib/renderer"
 	"net/http"
 	"strings"
 	"time"
@@ -29,12 +35,6 @@ type MyCustomClaims struct {
 	jwt.StandardClaims
 }
 
-// AuthID - Access details
-var AuthID uint64
-
-// Email - Access details
-var Email string
-
 // JWTPayload ...
 type JWTPayload struct {
 	AccessJWT  string `json:"AccessJWT"`
@@ -46,29 +46,76 @@ func JWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		val := c.Request.Header.Get("Authorization")
 		if len(val) == 0 || !strings.Contains(val, "Bearer ") {
+			xlogger.Debug("token haven't bearer or len is 0")
 			// log.Println("no vals or no Bearer found")
-			c.AbortWithStatus(http.StatusUnauthorized)
+			renderer.Render(c , gin.H{"status" : "error" ,
+				"code" : http.StatusUnauthorized , "msg" : global.GetLang().MSG_ERR_FORBIDDEN}, http.StatusUnauthorized)
 			return
 		}
 		vals := strings.Split(val, " ")
 		if len(vals) != 2 {
-			// log.Println("result split not valid")
-			c.AbortWithStatus(http.StatusUnauthorized)
+			xlogger.Debug("token is can not to split")
+			renderer.Render(c , gin.H{"status" : "error" ,
+				"code" : http.StatusUnauthorized , "msg" : global.GetLang().MSG_ERR_FORBIDDEN}, http.StatusUnauthorized)
 			return
 		}
 
-		token, err := jwt.ParseWithClaims(vals[1], &MyCustomClaims{}, validateAccessJWT)
+		claims := io_models.Claims{}
+		tokenString , err := jwt.ParseWithClaims(vals[1] , &claims , func(token *jwt.Token) (interface{} , error) {
+			return AccessKey , nil
+		})
 
 		if err != nil {
-			// log.Println("error parsing JWT", err)
-			c.AbortWithStatus(http.StatusUnauthorized)
+			xlogger.Info("token is can not to parse " + err.Error() )
+			isRemoved := transaction.DeleteDevice(&model.Device{Token: vals[1]})
+			xlogger.Info("token is not valid and delete device row -> " + global.STR(isRemoved))
+			renderer.Render(c , gin.H{"status" : "error" ,
+				"code" : http.StatusUnauthorized , "msg" : global.GetLang().MSG_ERR_FORBIDDEN}, http.StatusUnauthorized)
 			return
 		}
 
-		if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
-			// fmt.Println(claims.ID, claims.Email)
-			AuthID = claims.ID
+		if !tokenString.Valid {
+			isRemoved := transaction.DeleteDevice(&model.Device{Token: vals[1]})
+			xlogger.Info("token is not valid and delete device row -> " + global.STR(isRemoved))
+			renderer.Render(c , gin.H{"status" : "error" ,
+				"code" : http.StatusUnauthorized , "msg" : global.GetLang().MSG_ERR_FORBIDDEN}, http.StatusUnauthorized)
+			return
 		}
+
+ 		if time.Unix(claims.ExpiresAt , 0).Sub(time.Now()) < global.DAY_TO_SEC * 23 * time.Second{
+			expiretionTime := time.Now().Add(global.MONTH_TO_SEC * time.Second)
+			xlogger.Info("re new , token should to be right expire -> " + global.STR(claims.ExpiresAt))
+
+			newClaims := io_models.Claims{
+				Username:       claims.Username,
+				XXLG:           claims.XXLG,
+				StandardClaims: jwt.StandardClaims{
+					ExpiresAt: expiretionTime.Unix() ,
+				},
+			}
+			newToken := jwt.NewWithClaims(jwt.SigningMethodHS256 , newClaims)
+			newTokenString , err := newToken.SignedString(AccessKey); if err != nil {
+				xlogger.Err("can not sign a new token ")
+				renderer.Render(c , gin.H{"status" : "error" ,
+					"code" : http.StatusInternalServerError , "msg" : global.GetLang().MSG_ERR}, http.StatusInternalServerError)
+				return
+			}
+
+
+			if !transaction.DeviceUpdate(vals[1] , newTokenString) {
+				xlogger.Err("can not update device ")
+				renderer.Render(c , gin.H{"status" : "error" ,
+					"code" : http.StatusInternalServerError , "msg" : global.GetLang().MSG_ERR_FORBIDDEN}, http.StatusInternalServerError)
+				return
+			}
+
+			c.Request.Header.Set("Authorization" , "Bearer " + newTokenString)
+			c.Header("Authorization" , newTokenString)
+		} else {
+			c.Header("Authorization" , vals[1])
+		}
+
+		c.Next()
 	}
 }
 
@@ -81,16 +128,16 @@ func RefreshJWT() gin.HandlerFunc {
 			return
 		}
 
-		token, err := jwt.ParseWithClaims(jwtPayload.RefreshJWT, &MyCustomClaims{}, validateRefreshJWT)
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
+		//token, err := jwt.ParseWithClaims(jwtPayload.RefreshJWT, &MyCustomClaims{}, validateRefreshJWT)
+		//if err != nil {
+		//	c.AbortWithStatus(http.StatusUnauthorized)
+		//	return
+		//}
 
-		if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
-			AuthID = claims.ID
-			Email = claims.Email
-		}
+		//if claims, ok := token.Claims.(*MyCustomClaims); ok && token.Valid {
+		//	AuthID = claims.ID
+		//	Email = claims.Email
+		//}
 	}
 }
 

@@ -14,6 +14,7 @@ type Lang struct {
 	MSG_ERR_PHONENUMBER_EXISTS string
 	MSG_ERR_CAN_NOT_CERATE_USER string
 	MSG_SUCCESS_SIGNUP string
+	MSG_ERR_FORBIDDEN string
 }
 
 var FaLang = Lang{
@@ -24,6 +25,7 @@ var FaLang = Lang{
 	MSG_ERR_PHONENUMBER_EXISTS: "این شماره موبایل قبلا استفاده شده است",
 	MSG_ERR_CAN_NOT_CERATE_USER: "خطا در ثبت نام کاربر",
 	MSG_SUCCESS_SIGNUP: "به توتیر خوش آمدید" ,
+	MSG_ERR_FORBIDDEN: "شما اجازه دسترسی به این بخش را ندارید" ,
 }
 
 var EnLang = Lang{
@@ -34,6 +36,7 @@ var EnLang = Lang{
 	MSG_ERR_PHONENUMBER_EXISTS: "Your Phone Number already created",
 	MSG_ERR_CAN_NOT_CERATE_USER: "Signup user failed",
 	MSG_SUCCESS_SIGNUP: "Welcome To Tootier" ,
+	MSG_ERR_FORBIDDEN: "You can not access to this part",
 }
 
 func GetLang() Lang {

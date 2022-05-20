@@ -42,3 +42,6 @@ func CurrentTimeUnix() string {
 	return fmt.Sprintf("%v" , time.Now().Unix())
 }
 
+func STR(b interface{}) string {
+	return fmt.Sprintf("%v" , b)
+}

@@ -4,7 +4,8 @@
  - using env:	export GIN_MODE=release
  - using code:	gin.SetMode(gin.ReleaseMode)
 
-[GIN-debug] GET    /api/v1/user/all          --> github.com/pilinux/gorest/controller.GetUsers (5 handlers)
 [GIN-debug] GET    /api/v1/user/username/:username --> github.com/pilinux/gorest/controller.UserNameAvailable (5 handlers)
+[GIN-debug] GET    /api/v1/user/all/:username --> github.com/pilinux/gorest/controller.GetUsers (6 handlers)
 [GIN-debug] POST   /api/v1/auth/signup       --> github.com/pilinux/gorest/controller.Test (5 handlers)
 [GIN-debug] Listening and serving HTTP on :3000
+[GIN] 2022/05/20 - 12:24:30 | 200 |    116.7293ms |             ::1 | GET      "/api/v1/user/all/hossein"

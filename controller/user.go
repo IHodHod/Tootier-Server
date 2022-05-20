@@ -108,7 +108,7 @@ func Test(c *gin.Context) {
 	user.Name = register.Name
 	user.RegisterTime = global.CurrentTimeUnix()
 
-	// expiretionTime for Expire Token until 60 days after created
+	// expiretionTime for Expire Token until 30 days after created
 	expiretionTime := time.Now().Add(global.MONTH_TO_SEC * time.Second)
 	deviceUUID := uuid.String()
 
@@ -187,15 +187,15 @@ func goid() int {
 func GetUsers(c *gin.Context) {
 	db := database.GetDB()
 	users := model.User{
-		UserID: 1,
-	}
-	err := db.Select("Devices").Delete(users)
-
-	if err != nil {
-		fmt.Println(err)
-		renderer.Render(c, gin.H{"status": "error"}, 500)
+		UserName: c.Param("username"),
 	}
 
+	err := db.Find(&users , "user_name = ?" , users.UserName).Error; if err != nil {
+		renderer.Render(c , gin.H{"status":"error"} , 500)
+		return
+	}
+
+	renderer.Render(c , gin.H{"data" : users} , 200)
 	//db.Preload(clause.Associations).Find(&users)
 
 	//device := []model.Device{}
@@ -207,8 +207,7 @@ func GetUsers(c *gin.Context) {
 	//"").Joins("left join user.user_id on devices.user_id = user.user.id").
 	//Scan(&result{})
 
-	renderer.Render(c, gin.H{"status": "success"}, 202)
-	//renderer.Render(c, users, http.StatusOK)
+	//renderer.Render(c, gin.H{"status": "success"}, 202)
 }
 
 // CreateUser - POST /users
