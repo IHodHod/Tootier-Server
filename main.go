@@ -145,10 +145,9 @@ func SetupRouter() (*gin.Engine, error) {
 			user := v1.Group("user") // localhost:300//api/v1/user
 			user.GET("username/:username" , controller.UserNameAvailable) // api/v1/user/username/:username
 			user.Use(middleware.JWT())
-			user.GET("all/:username" , controller.GetUsers)
 			// Signup
 			auth := v1.Group("auth")
-			auth.POST("signup" , controller.Test) // api/v1/test
+			auth.POST("signup" , controller.Signup) // api/v1/test
 			//
 			//auth.POST("signup" , controller.CreateUserAuth)
 			//auth.POST("login" , controller.Login)
@@ -157,7 +156,7 @@ func SetupRouter() (*gin.Engine, error) {
 			//v1.POST("register", controller.CreateUserAuth)
 
 			// Login - app issues JWT
-			//v1.POST("login", controller.Login)
+			auth.POST("login", controller.Login)
 
 			// Refresh - app issues new JWT
 			//rJWT := v1.Group("refresh")

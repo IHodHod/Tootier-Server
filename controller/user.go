@@ -6,7 +6,6 @@ import (
 	uuid2 "github.com/gofrs/uuid"
 	"github.com/golang-jwt/jwt"
 	"github.com/pilinux/gorest/core/xlogger"
-	"github.com/pilinux/gorest/database"
 	"github.com/pilinux/gorest/database/model"
 	"github.com/pilinux/gorest/database/transaction"
 	"github.com/pilinux/gorest/global"
@@ -14,9 +13,6 @@ import (
 	"github.com/pilinux/gorest/lib/middleware"
 	"github.com/pilinux/gorest/lib/renderer"
 	"net/http"
-	"runtime"
-	"strconv"
-	"strings"
 	"time"
 )
 
@@ -43,14 +39,14 @@ func UserNameAvailable(c *gin.Context) {
 	renderer.Render(c, status.ToGin(), status.Code)
 }
 
-func Test(c *gin.Context) {
+func Signup(c *gin.Context) {
 	xlogger.Verbose("verbose")
 	xlogger.Info("information test")
 	xlogger.Debug("debug tests")
 	xlogger.Warn("warning tests")
 	xlogger.Err("error test")
 
-	status := global.CreateStatus()
+	status 	 := global.CreateStatus()
 	register := io_models.Register{}
 
 	err := c.BindJSON(&register)
@@ -166,171 +162,79 @@ func Test(c *gin.Context) {
 	renderer.Render(c, status.ToGin(), status.Code)
 }
 
-func goid() int {
-	var buf [64]byte
-	n := runtime.Stack(buf[:], false)
-	idField := strings.Fields(strings.TrimPrefix(string(buf[:n]), "goroutine "))[0]
-	id, err := strconv.Atoi(idField)
-	if err != nil {
-		panic(fmt.Sprintf("cannot get goroutine id: %v", err))
-	}
-	return id
-}
+func Login(c *gin.Context) {
+	login := io_models.Login{}
+	status := global.Status{}
 
-// for login must with device user included
-// delete device when logout
-
-// API : access to the server
-
-// security : renew 10 minute for token
-
-func GetUsers(c *gin.Context) {
-	db := database.GetDB()
-	users := model.User{
-		UserName: c.Param("username"),
-	}
-
-	err := db.Find(&users , "user_name = ?" , users.UserName).Error; if err != nil {
-		renderer.Render(c , gin.H{"status":"error"} , 500)
+	err := c.BindJSON(&login); if err != nil {
+		xlogger.Err("issue in binding json login " + err.Error())
+		status.Set("error" , global.GetLang().MSG_ERR , http.StatusBadRequest , nil)
+		renderer.Render(c , status.ToGin() , status.Code)
 		return
 	}
 
-	renderer.Render(c , gin.H{"data" : users} , 200)
-	//db.Preload(clause.Associations).Find(&users)
+	xlogger.Info(global.STR(login))
+	user := transaction.GetUserByUsernameAndPassword(login.UserName , login.Password)
+	if user.UserID < 1 {
+		xlogger.Err("issue in get user by username and pass ")
+		status.Set("error" , global.GetLang().MSG_ERR_LOGIN , http.StatusNotFound , nil)
+		renderer.Render(c , status.ToGin() , status.Code)
+		return
+	}
 
-	//device := []model.Device{}
+	uuid, err := uuid2.NewV1()
+	if err != nil {
+		status.Set("error" , global.GetLang().MSG_ERR_CAN_NOT_CERATE_USER , http.StatusInternalServerError , nil)
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	}
 
-	//db.Find(&users).Model()
-	//db.Find(&device)
+	// expiretionTime for Expire Token until 30 days after created
+	expiretionTime := time.Now().Add(global.MONTH_TO_SEC * time.Second)
+	deviceUUID := uuid.String()
 
-	//:= db.Model(&model.User{}).Select("*" +
-	//"").Joins("left join user.user_id on devices.user_id = user.user.id").
-	//Scan(&result{})
+	// Create the JWT claims, which includes the username and xxlg[deviceUUID] and expiry time
+	claims := &io_models.Claims{
+		Username: login.UserName,
+		XXLG:     deviceUUID,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expiretionTime.Unix(),
+		},
+	}
 
-	//renderer.Render(c, gin.H{"status": "success"}, 202)
-}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256 , claims)
+	tokenString , err := token.SignedString(middleware.AccessKey); if err != nil {
+		status.Set("error" , global.GetLang().MSG_ERR , http.StatusInternalServerError , nil)
+		renderer.Render(c, status.ToGin(), status.Code)
+		return
+	}
 
-// CreateUser - POST /users
-func CreateUser(c *gin.Context) {
-	//db := database.GetDB()
-	//user := model.User{}
-	//userFinal := model.User{}
-	//
-	//userIDAuth := middleware.AuthID
-	//
-	//// does the user have an existing profile
-	//if err := db.Where("id_auth = ?", userIDAuth).First(&userFinal).Error; err == nil {
-	//	renderer.Render(c, gin.H{"msg": "user profile found, no need to create a new one"}, http.StatusForbidden)
-	//	return
-	//}
-	//
-	//// bind JSON
-	//if err := c.ShouldBindJSON(&user); err != nil {
-	//	renderer.Render(c, gin.H{"msg": "bad request"}, http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//// user must not be able to manipulate all fields
-	//userFinal.FirstName = user.FirstName
-	//userFinal.LastName = user.LastName
-	//userFinal.IDAuth = userIDAuth
-	//
-	//tx := db.Begin()
-	//if err := tx.Create(&userFinal).Error; err != nil {
-	//	tx.Rollback()
-	//	log.WithError(err).Error("error code: 1101")
-	//	renderer.Render(c, gin.H{"msg": "internal server error"}, http.StatusInternalServerError)
-	//} else {
-	//	tx.Commit()
-	//	renderer.Render(c, userFinal, http.StatusCreated)
-	//}
-}
+	device := model.Device{
+		Hardware: model.Hardware{
+			DeviceName: login.DeviceName,
+			MacAddress: login.MacAddress,
+			OS:         login.OS,
+			IP:         login.Ip,
+			DeviceUUID: deviceUUID,
+		},
+		Token:              tokenString,
+		LastTimeVisit:      global.CurrentTimeUnix(),
+		RegisterTimeDevice: global.CurrentTimeUnix(),
+		UserID:             user.UserID,
+	}
 
-// UpdateUser - PUT /users
-func UpdateUser(c *gin.Context) {
-	//db := database.GetDB()
-	//user := model.User{}
-	//userFinal := model.User{}
-	//
-	//userIDAuth := middleware.AuthID
-	//
-	//// does the user have an existing profile
-	//if err := db.Where("id_auth = ?", userIDAuth).First(&userFinal).Error; err != nil {
-	//	renderer.Render(c, gin.H{"msg": "no user profile found"}, http.StatusNotFound)
-	//	return
-	//}
-	//
-	//// bind JSON
-	//if err := c.ShouldBindJSON(&user); err != nil {
-	//	renderer.Render(c, gin.H{"msg": "bad request"}, http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//// user must not be able to manipulate all fields
-	//userFinal.UpdatedAt = time.Now()
-	//userFinal.FirstName = user.FirstName
-	//userFinal.LastName = user.LastName
-	//
-	//tx := db.Begin()
-	//if err := tx.Save(&userFinal).Error; err != nil {
-	//	tx.Rollback()
-	//	log.WithError(err).Error("error code: 1111")
-	//	renderer.Render(c, gin.H{"msg": "internal server error"}, http.StatusInternalServerError)
-	//} else {
-	//	tx.Commit()
-	//	renderer.Render(c, userFinal, http.StatusOK)
-	//}
-}
+	if !transaction.UpdateGeoLocation(&user , login.Longitude , login.Latitude) {
+		status.Set("error" , global.GetLang().MSG_ERR , http.StatusInternalServerError , nil)
+		renderer.Render(c , status.ToGin() , status.Code)
+		return
+	}
 
-// AddHobby - PUT /users/hobbies
-func AddHobby(c *gin.Context) {
-	//db := database.GetDB()
-	//user := model.User{}
-	//hobby := model.Hobby{}
-	//hobbyNew := model.Hobby{}
-	//hobbyFound := 0 // default (do not create new hobby) = 0, create new hobby = 1
-	//
-	//userIDAuth := middleware.AuthID
-	//
-	//// does the user have an existing profile
-	//if err := db.Where("id_auth = ?", userIDAuth).First(&user).Error; err != nil {
-	//	renderer.Render(c, gin.H{"msg": "no user profile found"}, http.StatusForbidden)
-	//	return
-	//}
-	//
-	//// bind JSON
-	//if err := c.ShouldBindJSON(&hobby); err != nil {
-	//	renderer.Render(c, gin.H{"msg": "bad request"}, http.StatusBadRequest)
-	//	return
-	//}
-	//
-	//if err := db.Where("hobby = ?", hobby.Hobby).First(&hobbyNew).Error; err != nil {
-	//	hobbyFound = 1 // create new hobby
-	//}
-	//
-	//if hobbyFound == 1 {
-	//	hobbyNew.Hobby = hobby.Hobby
-	//	tx := db.Begin()
-	//	if err := tx.Create(&hobbyNew).Error; err != nil {
-	//		tx.Rollback()
-	//		log.WithError(err).Error("error code: 1121")
-	//		renderer.Render(c, gin.H{"msg": "internal server error"}, http.StatusInternalServerError)
-	//	} else {
-	//		tx.Commit()
-	//		hobbyFound = 0
-	//	}
-	//}
-	//
-	//if hobbyFound == 0 {
-	//	user.Hobbies = append(user.Hobbies, hobbyNew)
-	//	tx := db.Begin()
-	//	if err := tx.Save(&user).Error; err != nil {
-	//		tx.Rollback()
-	//		log.WithError(err).Error("error code: 1131")
-	//		renderer.Render(c, gin.H{"msg": "internal server error"}, http.StatusInternalServerError)
-	//	} else {
-	//		tx.Commit()
-	//		renderer.Render(c, user, http.StatusOK)
-	//	}
-	//}
+	if !transaction.AddDevice(&user , &device) {
+		status.Set("error" , global.GetLang().MSG_ERR , http.StatusInternalServerError , nil)
+		renderer.Render(c , status.ToGin() , status.Code)
+		return
+	}
+
+	status.Set("success" , global.GetLang().MSG_SUCCESS_LOGIN , http.StatusOK , gin.H{"token": tokenString ,"user" : user})
+	renderer.Render(c , status.ToGin() , status.Code)
 }

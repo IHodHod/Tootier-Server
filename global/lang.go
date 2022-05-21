@@ -11,10 +11,12 @@ type Lang struct {
 	MSG_ERR                    string
 	MSG_ERR_USERNAME_EXISTS    string
 	MSG_ERR_EMAIL_EXISTS       string
+	MSG_ERR_LOGIN       string
 	MSG_ERR_PHONENUMBER_EXISTS string
 	MSG_ERR_CAN_NOT_CERATE_USER string
 	MSG_SUCCESS_SIGNUP string
 	MSG_ERR_FORBIDDEN string
+	MSG_SUCCESS_LOGIN string
 }
 
 var FaLang = Lang{
@@ -26,6 +28,8 @@ var FaLang = Lang{
 	MSG_ERR_CAN_NOT_CERATE_USER: "خطا در ثبت نام کاربر",
 	MSG_SUCCESS_SIGNUP: "به توتیر خوش آمدید" ,
 	MSG_ERR_FORBIDDEN: "شما اجازه دسترسی به این بخش را ندارید" ,
+	MSG_ERR_LOGIN: "نام کاربری یا رمز عبور نادرست است",
+	MSG_SUCCESS_LOGIN: "به توتیر خوش آمدید",
 }
 
 var EnLang = Lang{
@@ -37,6 +41,8 @@ var EnLang = Lang{
 	MSG_ERR_CAN_NOT_CERATE_USER: "Signup user failed",
 	MSG_SUCCESS_SIGNUP: "Welcome To Tootier" ,
 	MSG_ERR_FORBIDDEN: "You can not access to this part",
+	MSG_ERR_LOGIN: "Username or Password are incorrect",
+	MSG_SUCCESS_LOGIN: "Welcome To Tootier",
 }
 
 func GetLang() Lang {
